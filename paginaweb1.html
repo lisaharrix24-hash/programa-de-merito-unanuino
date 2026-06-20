@@ -1,0 +1,2000 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Programa de Mérito Unanuino</title>
+
+<!-- FUENTES -->
+
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+
+<style>
+
+/* =====================================
+   RESET GENERAL
+===================================== */
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html{
+scroll-behavior:smooth;
+}
+
+body{
+
+font-family:'Poppins',sans-serif;
+
+background:
+linear-gradient(
+135deg,
+#d7eeff,
+#eef8ff,
+#cfe8ff
+);
+
+min-height:100vh;
+
+padding:20px;
+
+overflow-x:hidden;
+
+position:relative;
+
+}
+
+/* =====================================
+   FONDO ANIMADO
+===================================== */
+
+body::before{
+
+content:"";
+
+position:fixed;
+
+top:-250px;
+left:-250px;
+
+width:550px;
+height:550px;
+
+border-radius:50%;
+
+background:
+rgba(100,181,246,.22);
+
+filter:blur(90px);
+
+animation:flotarUno 12s ease-in-out infinite alternate;
+
+z-index:-1;
+
+}
+
+body::after{
+
+content:"";
+
+position:fixed;
+
+bottom:-250px;
+right:-250px;
+
+width:550px;
+height:550px;
+
+border-radius:50%;
+
+background:
+rgba(30,136,229,.18);
+
+filter:blur(90px);
+
+animation:flotarDos 14s ease-in-out infinite alternate;
+
+z-index:-1;
+
+}
+
+@keyframes flotarUno{
+
+from{
+transform:
+translate(0,0);
+}
+
+to{
+transform:
+translate(120px,80px);
+}
+
+}
+
+@keyframes flotarDos{
+
+from{
+transform:
+translate(0,0);
+}
+
+to{
+transform:
+translate(-120px,-80px);
+}
+
+}
+
+/* =====================================
+   LOGIN
+===================================== */
+
+.login-overlay{
+
+position:fixed;
+
+top:0;
+left:0;
+
+width:100%;
+height:100vh;
+
+display:flex;
+
+justify-content:center;
+align-items:center;
+
+background:
+rgba(240,248,255,.55);
+
+backdrop-filter:blur(12px);
+
+z-index:9999;
+
+}
+
+.login-card{
+
+width:380px;
+
+padding:35px;
+
+border-radius:32px;
+
+background:
+rgba(255,255,255,.93);
+
+backdrop-filter:blur(18px);
+
+box-shadow:
+0 25px 60px rgba(30,136,229,.18);
+
+border:
+1px solid rgba(255,255,255,.70);
+
+animation:entrada .8s ease;
+
+}
+
+@keyframes entrada{
+
+from{
+
+opacity:0;
+
+transform:
+translateY(30px)
+scale(.96);
+
+}
+
+to{
+
+opacity:1;
+
+transform:
+translateY(0)
+scale(1);
+
+}
+
+}
+
+.login-card h2{
+
+font-family:'Cinzel',serif;
+
+font-size:30px;
+
+text-align:center;
+
+margin-bottom:10px;
+
+background:
+linear-gradient(
+135deg,
+#0d47a1,
+#1e88e5,
+#64b5f6
+);
+
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+
+}
+
+.login-card p{
+
+text-align:center;
+
+color:#607d8b;
+
+margin-bottom:24px;
+
+font-size:14px;
+
+}
+
+.login-card input{
+
+width:100%;
+
+padding:14px;
+
+margin-bottom:14px;
+
+border-radius:16px;
+
+border:
+2px solid #d7ebff;
+
+font-size:14px;
+
+outline:none;
+
+transition:.30s;
+
+}
+
+.login-card input:focus{
+
+border-color:#1e88e5;
+
+box-shadow:
+0 0 20px rgba(30,136,229,.15);
+
+transform:
+translateY(-2px);
+
+}
+
+.btn-login{
+
+width:100%;
+
+padding:15px;
+
+border:none;
+
+border-radius:18px;
+
+cursor:pointer;
+
+font-size:15px;
+
+font-weight:600;
+
+color:white;
+
+background:
+linear-gradient(
+135deg,
+#1565c0,
+#1e88e5,
+#64b5f6
+);
+
+transition:.35s;
+
+box-shadow:
+0 10px 25px rgba(30,136,229,.25);
+
+}
+
+.btn-login:hover{
+
+transform:
+translateY(-4px);
+
+box-shadow:
+0 16px 35px rgba(30,136,229,.30);
+
+}
+
+#loginError{
+
+margin-top:12px;
+
+min-height:20px;
+
+text-align:center;
+
+font-size:13px;
+
+font-weight:600;
+
+color:#c62828;
+
+}
+
+/* =====================================
+   CONTENEDOR PRINCIPAL
+===================================== */
+
+.ficha{
+
+display:none;
+
+background:
+linear-gradient(
+180deg,
+rgba(255,255,255,.98),
+rgba(245,251,255,.98)
+);
+
+border-radius:35px;
+
+padding:30px;
+
+box-shadow:
+0 20px 60px rgba(30,136,229,.12);
+
+animation:entrada .7s ease;
+
+}
+
+/* =====================================
+   CABECERA
+===================================== */
+
+.cabecera-principal{
+
+text-align:center;
+
+margin-bottom:30px;
+
+}
+.cabecera-principal h1{
+
+font-family:'Cinzel',serif;
+
+font-size:42px;
+
+font-weight:700;
+
+letter-spacing:2px;
+
+background:
+linear-gradient(
+90deg,
+#0d47a1,
+#42a5f5,
+#90caf9,
+#42a5f5,
+#0d47a1
+);
+
+background-size:400% 400%;
+
+-webkit-background-clip:text;
+
+-webkit-text-fill-color:transparent;
+
+animation:
+tituloPremium 8s linear infinite;
+
+}
+
+@keyframes brillo{
+
+from{
+filter:brightness(1);
+}
+
+to{
+filter:brightness(1.20);
+}
+
+}
+
+.cabecera-principal p{
+
+color:#607d8b;
+
+margin-top:6px;
+
+font-size:15px;
+
+}
+
+.cabecera-principal::after{
+
+content:"";
+
+display:block;
+
+width:130px;
+height:5px;
+
+margin:15px auto 0;
+
+border-radius:20px;
+
+background:
+linear-gradient(
+90deg,
+#64b5f6,
+#1e88e5
+);
+
+}
+.seccion,
+.datos-complementarios,
+.selector-grado{
+
+background:rgba(255,255,255,.88);
+
+backdrop-filter:blur(18px);
+
+border:1px solid rgba(255,255,255,.65);
+
+}
+@keyframes flotarSuave{
+
+0%{
+transform:translateY(0px);
+}
+
+50%{
+transform:translateY(-5px);
+}
+
+100%{
+transform:translateY(0px);
+}
+
+}
+
+.cuadro{
+
+animation:
+flotarSuave 4s ease-in-out infinite;
+
+}
+.btn-guardar,
+.btn-cerrar{
+
+position:relative;
+
+overflow:hidden;
+
+}
+
+.btn-guardar::before,
+.btn-cerrar::before{
+
+content:"";
+
+position:absolute;
+
+top:0;
+
+left:-120%;
+
+width:70px;
+
+height:100%;
+
+background:
+
+linear-gradient(
+90deg,
+transparent,
+rgba(255,255,255,.45),
+transparent
+);
+
+transform:skewX(-25deg);
+
+animation:brilloBoton 4s infinite;
+
+}
+
+@keyframes brilloBoton{
+
+100%{
+left:150%;
+}
+
+}
+@keyframes aparecer{
+
+from{
+
+opacity:0;
+
+transform:
+translateY(25px);
+
+}
+
+to{
+
+opacity:1;
+
+transform:
+translateY(0);
+
+}
+
+}
+
+.seccion{
+
+animation:
+aparecer .8s ease forwards;
+
+}
+.tabla tr{
+
+transition:.3s;
+
+}
+
+.tabla tr:hover{
+
+transform:scale(1.01);
+
+background:#f2f9ff;
+
+box-shadow:
+0 4px 15px rgba(30,136,229,.08);
+
+}
+.cabecera-principal h1{
+
+background:
+linear-gradient(
+90deg,
+#0d47a1,
+#42a5f5,
+#0d47a1
+);
+
+background-size:300% 300%;
+
+-webkit-background-clip:text;
+
+-webkit-text-fill-color:transparent;
+
+animation:
+tituloPremium 6s linear infinite;
+
+}
+
+@keyframes tituloPremium{
+
+0%{
+background-position:0% 50%;
+}
+
+100%{
+background-position:100% 50%;
+}
+
+}
+input:focus,
+textarea:focus,
+select:focus{
+
+box-shadow:
+0 0 0 4px rgba(66,165,245,.15),
+0 0 25px rgba(66,165,245,.25);
+
+}
+body::before{
+
+animation:
+flotar1 10s ease-in-out infinite alternate;
+
+}
+
+body::after{
+
+animation:
+flotar2 12s ease-in-out infinite alternate;
+
+}
+.accion-card{
+
+animation:
+flotarSuave 5s ease-in-out infinite;
+
+}
+
+.accion-card:nth-child(2){
+animation-delay:.5s;
+}
+
+.accion-card:nth-child(3){
+animation-delay:1s;
+}
+
+.accion-card:nth-child(4){
+animation-delay:1.5s;
+}
+
+.accion-card:nth-child(5){
+animation-delay:2s;
+}
+
+.accion-card:nth-child(6){
+animation-delay:2.5s;
+}
+.cabecera-principal h1{
+
+animation:
+brilloTitulo 4s infinite alternate,
+resplandorTitulo 6s infinite linear;
+
+}
+
+@keyframes resplandorTitulo{
+
+0%{
+text-shadow:
+0 0 10px rgba(100,181,246,.2);
+}
+
+50%{
+text-shadow:
+0 0 30px rgba(100,181,246,.6),
+0 0 50px rgba(30,136,229,.4);
+}
+
+100%{
+text-shadow:
+0 0 10px rgba(100,181,246,.2);
+}
+
+}
+body::before,
+body::after{
+content:"";
+position:fixed;
+border-radius:50%;
+pointer-events:none;
+z-index:-1;
+animation:flotar 12s infinite alternate ease-in-out;
+}
+
+body::before{
+width:300px;
+height:300px;
+top:5%;
+left:5%;
+background:rgba(100,181,246,.15);
+filter:blur(60px);
+}
+
+body::after{
+width:350px;
+height:350px;
+bottom:5%;
+right:5%;
+background:rgba(33,150,243,.12);
+filter:blur(80px);
+}
+
+@keyframes flotar{
+from{
+transform:translateY(0px);
+}
+to{
+transform:translateY(40px);
+}
+}
+</style>
+
+</head>
+<script src="jsapp.js"></script>
+<body>
+    <!-- =====================================
+     LOGIN
+===================================== -->
+
+<div id="loginBox" class="login-overlay">
+
+    <div class="login-card">
+
+        <h2>Acceso Docente</h2>
+
+        <p>
+            Programa de Mérito Unanuino
+        </p>
+
+        <input
+            type="email"
+            id="email"
+            placeholder="Correo electrónico">
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Contraseña">
+
+        <button
+            class="btn-login"
+            onclick="login()">
+
+            Iniciar Sesión
+
+        </button>
+
+        <div id="loginError"></div>
+
+    </div>
+
+</div>
+
+<!-- =====================================
+     SISTEMA PRINCIPAL
+===================================== -->
+
+<div class="ficha">
+
+    <!-- CABECERA -->
+
+    <div class="cabecera-principal">
+
+        <h1>
+            PROGRAMA DE MÉRITO UNANUINO
+        </h1>
+
+        <p class="subtitulo-institucion">
+I.E.E. HIPÓLITO UNANUE 0040
+</p>
+        <p>
+            Reconocimiento y seguimiento del desempeño estudiantil
+        </p>
+
+    </div>
+
+<style>
+
+/* =====================================
+   TARJETAS GENERALES
+===================================== */
+
+.seccion,
+.selector-grado,
+.datos-complementarios{
+
+background:white;
+
+padding:24px;
+
+border-radius:24px;
+
+margin-bottom:25px;
+
+box-shadow:
+0 12px 30px rgba(30,136,229,.08);
+
+animation:subir .7s ease;
+
+}
+
+@keyframes subir{
+
+from{
+opacity:0;
+transform:translateY(15px);
+}
+
+to{
+opacity:1;
+transform:translateY(0);
+}
+
+}
+
+/* =====================================
+   SELECTOR DE AULA
+===================================== */
+
+.selector-grado label{
+
+display:block;
+
+font-weight:600;
+
+font-size:15px;
+
+margin-bottom:10px;
+
+color:#1565c0;
+
+}
+
+.selector-grado select{
+
+width:100%;
+
+padding:14px;
+
+border:none;
+
+border-radius:16px;
+
+background:#ffffff;
+
+font-size:15px;
+
+outline:none;
+
+box-shadow:
+0 4px 12px rgba(30,136,229,.08);
+
+transition:.30s;
+
+}
+
+.selector-grado select:focus{
+
+box-shadow:
+0 0 20px rgba(30,136,229,.15);
+
+}
+
+/* =====================================
+   CAMPOS GENERALES
+===================================== */
+
+.datos-complementarios label{
+
+display:block;
+
+font-weight:600;
+
+margin-top:12px;
+
+margin-bottom:6px;
+
+color:#1565c0;
+
+}
+
+input[type="text"],
+textarea{
+
+width:100%;
+
+padding:13px;
+
+border:
+2px solid #d9ecff;
+
+border-radius:15px;
+
+font-size:14px;
+
+outline:none;
+
+transition:.30s;
+
+}
+
+input[type="text"]:focus,
+textarea:focus{
+
+border-color:#1e88e5;
+
+box-shadow:
+0 0 18px rgba(30,136,229,.15);
+
+transform:
+translateY(-2px);
+
+}
+.subtitulo-institucion{
+
+font-family:'Cinzel', serif;
+
+font-size:22px;
+
+font-weight:700;
+
+letter-spacing:3px;
+
+text-transform:uppercase;
+
+background:
+linear-gradient(
+135deg,
+#1565c0,
+#42a5f5,
+#90caf9
+);
+
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+
+margin-top:10px;
+
+animation:
+brilloInstitucion 4s ease-in-out infinite;
+
+}
+</style>
+
+<!-- =====================================
+     SELECTOR DE AULA
+===================================== -->
+
+<section class="selector-grado">
+
+    <label>
+        Grado y Sección
+    </label>
+
+    <select
+        id="gradoSeccion"
+        onchange="cambiarGrado()">
+
+        <option value="">
+            -- Seleccionar Aula --
+        </option>
+
+        <option value="1° A">1° A</option>
+        <option value="1° B">1° B</option>
+        <option value="1° C">1° C</option>
+        <option value="1° D">1° D</option>
+        <option value="1° E">1° E</option>
+        <option value="1° F">1° F</option>
+        <option value="1° G">1° G</option>
+        <option value="1° H">1° H</option>
+
+        <option value="2° A">2° A</option>
+        <option value="2° B">2° B</option>
+        <option value="2° C">2° C</option>
+        <option value="2° D">2° D</option>
+        <option value="2° E">2° E</option>
+        <option value="2° F">2° F</option>
+        <option value="2° G">2° G</option>
+        <option value="2° H">2° H</option>
+
+        <option value="3° A">3° A</option>
+        <option value="3° B">3° B</option>
+        <option value="3° C">3° C</option>
+        <option value="3° D">3° D</option>
+        <option value="3° E">3° E</option>
+        <option value="3° F">3° F</option>
+        <option value="3° G">3° G</option>
+
+        <option value="4° A">4° A</option>
+        <option value="4° B">4° B</option>
+        <option value="4° C">4° C</option>
+        <option value="4° D">4° D</option>
+        <option value="4° E">4° E</option>
+        <option value="4° F">4° F</option>
+        <option value="4° G">4° G</option>
+
+        <option value="5° A">5° A</option>
+        <option value="5° B">5° B</option>
+        <option value="5° C">5° C</option>
+        <option value="5° D">5° D</option>
+        <option value="5° E">5° E</option>
+        <option value="5° F">5° F</option>
+        <option value="5° G">5° G</option>
+
+    </select>
+
+</section>
+
+<!-- =====================================
+     DATOS COMPLEMENTARIOS
+===================================== -->
+
+<section class="datos-complementarios">
+
+    <label>
+        Tutor(a)
+    </label>
+
+    <input
+        type="text"
+        id="tutor"
+        placeholder="Ingrese el nombre del tutor">
+
+    <label>
+        Semana
+    </label>
+
+    <input
+        type="text"
+        id="semana"
+        placeholder="Ejemplo: Semana 12">
+
+    <label>
+        Fecha de Inicio
+    </label>
+
+    <input
+        type="text"
+        id="fechaInicio"
+        placeholder="dd/mm/aaaa">
+
+    <label>
+        Fecha de Fin
+    </label>
+
+    <input
+        type="text"
+        id="fechaFin"
+        placeholder="dd/mm/aaaa">
+
+</section>
+<style>
+
+/* =====================================
+   TABLAS PROFESIONALES
+===================================== */
+
+.tabla-contenedor{
+
+overflow-x:auto;
+
+margin-top:18px;
+
+border-radius:20px;
+
+box-shadow:
+0 10px 25px rgba(30,136,229,.08);
+
+}
+
+.tabla{
+
+width:100%;
+
+border-collapse:collapse;
+
+background:white;
+
+min-width:900px;
+
+overflow:hidden;
+
+}
+
+.tabla thead th{
+
+background:
+linear-gradient(
+135deg,
+#1565c0,
+#1e88e5
+);
+
+color:white;
+
+padding:14px;
+
+font-size:13px;
+
+font-weight:600;
+
+text-align:center;
+
+letter-spacing:.4px;
+
+}
+
+.tabla tbody td{
+
+padding:10px;
+
+border-bottom:
+1px solid #e5f2ff;
+
+text-align:center;
+
+font-size:13px;
+
+transition:.25s;
+
+}
+
+.tabla tbody tr:hover{
+
+background:
+rgba(227,242,253,.55);
+
+}
+
+.tabla input[type="checkbox"]{
+
+width:18px;
+height:18px;
+
+cursor:pointer;
+
+accent-color:#1e88e5;
+
+}
+
+.tabla input[type="text"]{
+
+padding:10px;
+
+font-size:13px;
+
+}
+
+.seccion h3{
+
+font-size:24px;
+
+color:#1565c0;
+
+margin-bottom:12px;
+
+}
+
+.seccion p{
+
+color:#607d8b;
+
+font-size:14px;
+
+line-height:1.6;
+
+}
+
+</style>
+
+<!-- =====================================
+     CRITERIOS BÁSICOS
+===================================== -->
+
+<section class="seccion">
+
+    <h3>
+        Criterios Básicos
+    </h3>
+
+    <p>
+        Marque los criterios cumplidos por cada estudiante.
+        Cada criterio suma un punto al puntaje semanal.
+    </p>
+
+    <div class="tabla-contenedor">
+
+        <table
+            class="tabla"
+            id="tablaBasicos">
+
+            <thead>
+
+                <tr>
+
+                    <th style="width:70px;">
+                        N°
+                    </th>
+
+                    <th style="min-width:280px;">
+                        ESTUDIANTE
+                    </th>
+
+                    <th>
+                        PUNTUALIDAD
+                        <br>
+                        +1
+                    </th>
+
+                    <th>
+                        UNIFORME
+                        <br>
+                        +1
+                    </th>
+
+                    <th>
+                        TAREAS
+                        <br>
+                        +1
+                    </th>
+
+                    <th>
+                        CONDUCTA
+                        <br>
+                        +1
+                    </th>
+
+                    <th>
+                        TOTAL
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <!--
+                GENERADO AUTOMÁTICAMENTE
+                DESDE JSAPP.JS
+                -->
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+<style>
+
+/* =====================================
+   ACCIONES DESTACADAS
+===================================== */
+
+.acciones-info{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(180px,1fr));
+
+gap:16px;
+
+margin-top:18px;
+margin-bottom:22px;
+
+}
+
+.accion-card{
+
+background:
+linear-gradient(
+180deg,
+rgba(255,255,255,.98),
+rgba(240,248,255,.98)
+);
+
+padding:20px;
+
+border-radius:22px;
+
+text-align:center;
+
+border:
+1px solid #d7eaff;
+
+box-shadow:
+0 10px 25px rgba(30,136,229,.10);
+
+transition:.35s;
+
+position:relative;
+
+overflow:hidden;
+
+}
+
+.accion-card::before{
+
+content:"";
+
+position:absolute;
+
+top:-100%;
+left:-100%;
+
+width:220%;
+height:220%;
+
+background:
+linear-gradient(
+45deg,
+transparent,
+rgba(255,255,255,.30),
+transparent
+);
+
+transition:.8s;
+
+}
+
+.accion-card:hover{
+
+transform:
+translateY(-6px)
+scale(1.02);
+
+box-shadow:
+0 18px 35px rgba(30,136,229,.18);
+
+}
+
+.accion-card:hover::before{
+
+transform:
+translate(100%,100%);
+
+}
+
+.accion-titulo{
+
+font-size:15px;
+
+font-weight:600;
+
+color:#1565c0;
+
+margin-bottom:8px;
+
+}
+
+.accion-puntos{
+
+font-size:14px;
+
+font-weight:700;
+
+color:#1e88e5;
+
+}
+
+</style>
+
+<!-- =====================================
+     ACCIONES DESTACADAS
+===================================== -->
+
+<section class="seccion">
+
+    <h3>
+        Acciones Destacadas
+    </h3>
+
+    <p>
+        Registre las acciones positivas realizadas por los
+        estudiantes durante la semana. Estas acciones otorgan
+        puntajes adicionales.
+    </p>
+
+    <div class="acciones-info">
+
+        <div class="accion-card">
+            <div class="accion-titulo">
+                Ayuda Voluntaria
+            </div>
+            <div class="accion-puntos">
+                +2 puntos
+            </div>
+        </div>
+
+        <div class="accion-card">
+            <div class="accion-titulo">
+                Participación Activa
+            </div>
+            <div class="accion-puntos">
+                +2 puntos
+            </div>
+        </div>
+
+        <div class="accion-card">
+            <div class="accion-titulo">
+                Orden y Limpieza
+            </div>
+            <div class="accion-puntos">
+                +2 puntos
+            </div>
+        </div>
+
+        <div class="accion-card">
+            <div class="accion-titulo">
+                Representación del Aula
+            </div>
+            <div class="accion-puntos">
+                +3 puntos
+            </div>
+        </div>
+
+        <div class="accion-card">
+            <div class="accion-titulo">
+                Liderazgo
+            </div>
+            <div class="accion-puntos">
+                +3 puntos
+            </div>
+        </div>
+
+        <div class="accion-card">
+            <div class="accion-titulo">
+                Solidaridad
+            </div>
+            <div class="accion-puntos">
+                +3 puntos
+            </div>
+        </div>
+
+    </div>
+
+    <div class="tabla-contenedor">
+
+        <table
+            class="tabla"
+            id="tablaDestacados">
+
+            <thead>
+
+                <tr>
+
+                    <th style="width:70px;">
+                        N°
+                    </th>
+
+                    <th style="min-width:280px;">
+                        ESTUDIANTE
+                    </th>
+
+                    <th>
+                        ACCIÓN 1
+                        <br>
+                        +2
+                    </th>
+
+                    <th>
+                        ACCIÓN 2
+                        <br>
+                        +2
+                    </th>
+
+                    <th>
+                        ACCIÓN 3
+                        <br>
+                        +2
+                    </th>
+
+                    <th>
+                        ACCIÓN 4
+                        <br>
+                        +3
+                    </th>
+
+                    <th>
+                        ACCIÓN 5
+                        <br>
+                        +3
+                    </th>
+
+                    <th>
+                        ACCIÓN 6
+                        <br>
+                        +3
+                    </th>
+
+                    <th>
+                        TOTAL
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                <!--
+                GENERADO AUTOMÁTICAMENTE
+                DESDE JSAPP.JS
+                -->
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+<style>
+
+/* =====================================
+   RESUMEN GENERAL
+===================================== */
+
+.resumen-cuadros{
+
+display:grid;
+
+grid-template-columns:
+repeat(auto-fit,minmax(220px,1fr));
+
+gap:20px;
+
+margin-top:20px;
+
+}
+
+.cuadro{
+
+background:
+linear-gradient(
+180deg,
+rgba(255,255,255,.98),
+rgba(236,246,255,.98)
+);
+
+padding:24px;
+
+border-radius:24px;
+
+text-align:center;
+
+position:relative;
+
+overflow:hidden;
+
+box-shadow:
+0 12px 30px rgba(30,136,229,.10);
+
+transition:.35s;
+
+}
+
+.cuadro:hover{
+
+transform:
+translateY(-6px);
+
+box-shadow:
+0 18px 40px rgba(30,136,229,.16);
+
+}
+
+.cuadro::before{
+
+content:"";
+
+position:absolute;
+
+top:-120%;
+left:-120%;
+
+width:240%;
+height:240%;
+
+background:
+linear-gradient(
+45deg,
+transparent,
+rgba(255,255,255,.30),
+transparent
+);
+
+animation:reflejo 10s linear infinite;
+
+}
+
+@keyframes reflejo{
+
+100%{
+transform:
+translate(100%,100%);
+}
+
+}
+
+.cuadro h4{
+
+font-size:17px;
+
+font-weight:600;
+
+color:#1565c0;
+
+margin-bottom:14px;
+
+position:relative;
+
+z-index:2;
+
+}
+
+.cuadro input{
+
+width:100%;
+
+padding:14px;
+
+border:none;
+
+border-radius:16px;
+
+background:white;
+
+text-align:center;
+
+font-size:28px;
+
+font-weight:700;
+
+color:#0d47a1;
+
+box-shadow:
+inset 0 2px 8px rgba(30,136,229,.08);
+
+position:relative;
+
+z-index:2;
+
+}
+
+</style>
+
+<!-- =====================================
+     RESUMEN GENERAL
+===================================== -->
+
+<section class="seccion">
+
+    <h3>
+        Resumen General
+    </h3>
+
+    <p>
+        Consolidado automático de los puntajes obtenidos
+        durante la semana por el aula seleccionada.
+    </p>
+
+    <div class="resumen-cuadros">
+
+        <div class="cuadro">
+
+            <h4>
+                Puntos Básicos
+            </h4>
+
+            <input
+                type="text"
+                id="totalBasicos"
+                value="0"
+                readonly>
+
+        </div>
+
+        <div class="cuadro">
+
+            <h4>
+                Puntos Destacados
+            </h4>
+
+            <input
+                type="text"
+                id="totalDestacados"
+                value="0"
+                readonly>
+
+        </div>
+
+        <div class="cuadro">
+
+            <h4>
+                Total Semanal
+            </h4>
+
+            <input
+                type="text"
+                id="totalSemana"
+                value="0"
+                readonly>
+
+        </div>
+
+    </div>
+
+</section>
+<style>
+
+/* =====================================
+   OBSERVACIONES
+===================================== */
+
+#observaciones{
+
+width:100%;
+
+min-height:160px;
+
+padding:18px;
+
+border:
+2px solid #d9ecff;
+
+border-radius:20px;
+
+font-size:14px;
+
+font-family:'Poppins',sans-serif;
+
+resize:vertical;
+
+outline:none;
+
+transition:.35s;
+
+background:white;
+
+}
+
+#observaciones:focus{
+
+border-color:#42a5f5;
+
+box-shadow:
+0 0 22px rgba(66,165,245,.18);
+
+transform:
+translateY(-2px);
+
+}
+
+/* =====================================
+   MENSAJE DE GUARDADO
+===================================== */
+
+#avisoGuardado{
+
+margin-top:15px;
+
+min-height:24px;
+
+font-size:14px;
+
+font-weight:600;
+
+text-align:center;
+
+color:#1565c0;
+
+transition:.3s;
+
+}
+
+/* =====================================
+   BOTONES
+===================================== */
+
+.botones-finales{
+
+display:grid;
+
+grid-template-columns:
+1fr 1fr;
+
+gap:18px;
+
+margin-top:25px;
+
+}
+
+.btn-guardar,
+.btn-cerrar{
+
+padding:16px;
+
+border:none;
+
+border-radius:20px;
+
+cursor:pointer;
+
+font-size:15px;
+
+font-weight:600;
+
+transition:.35s;
+
+}
+
+.btn-guardar{
+
+color:white;
+
+background:
+linear-gradient(
+135deg,
+#1565c0,
+#1e88e5,
+#64b5f6
+);
+
+box-shadow:
+0 10px 25px rgba(30,136,229,.25);
+
+}
+
+.btn-guardar:hover{
+
+transform:
+translateY(-4px);
+
+box-shadow:
+0 18px 35px rgba(30,136,229,.30);
+
+}
+
+.btn-cerrar{
+
+color:white;
+
+background:
+linear-gradient(
+135deg,
+#d32f2f,
+#ef5350
+);
+
+box-shadow:
+0 10px 25px rgba(211,47,47,.20);
+
+}
+
+.btn-cerrar:hover{
+
+transform:
+translateY(-4px);
+
+box-shadow:
+0 18px 35px rgba(211,47,47,.30);
+
+}
+
+/* =====================================
+   RESPONSIVE
+===================================== */
+
+@media(max-width:700px){
+
+.botones-finales{
+
+grid-template-columns:1fr;
+
+}
+
+}
+
+</style>
+
+<!-- =====================================
+     OBSERVACIONES
+===================================== -->
+
+<section class="seccion">
+
+    <h3>
+        Observaciones
+    </h3>
+
+    <p>
+        Registre incidencias, reconocimientos,
+        recomendaciones o cualquier información
+        relevante de la semana.
+    </p>
+
+    <br>
+
+    <textarea
+        id="observaciones"
+        placeholder="Ingrese observaciones generales del aula...">
+    </textarea>
+
+    <div id="avisoGuardado"></div>
+
+</section>
+
+<!-- =====================================
+     BOTONES DE ACCIÓN
+===================================== -->
+
+<section class="seccion">
+
+    <div class="botones-finales">
+
+        <button
+            class="btn-guardar"
+            onclick="guardarDatos()">
+
+            Guardar Ficha
+
+        </button>
+
+        <button
+            class="btn-cerrar"
+            onclick="cerrarSesion()">
+
+            Cerrar Sesión
+
+        </button>
+
+    </div>
+
+</section>
+<!-- =====================================
+     FIREBASE CONFIG
+===================================== -->
+
+<script>
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyAPGuaA4HSnaaoKP1SDkQ8YLfVo0Z_m-hg",
+
+  authDomain:
+  "programa-de-merito-unanuino.firebaseapp.com",
+
+  projectId:
+  "programa-de-merito-unanuino",
+
+  storageBucket:
+  "programa-de-merito-unanuino.firebasestorage.app",
+
+  messagingSenderId:
+  "1721316487",
+
+  appId:
+  "1:1721316487:web:d6787a7e5c300f9d13f422"
+
+};
+
+/* INICIALIZAR FIREBASE */
+
+if (!firebase.apps.length) {
+
+    firebase.initializeApp(
+        firebaseConfig
+    );
+
+}
+
+/* VARIABLES GLOBALES */
+
+window.auth =
+firebase.auth();
+
+window.db =
+firebase.firestore();
+
+console.log(
+    "Firebase inicializado correctamente"
+);
+
+</script>
+
+<!-- =====================================
+     JS PRINCIPAL
+===================================== -->
+
+</body>
+</html>
